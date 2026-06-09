@@ -1,0 +1,22 @@
+{
+	email gunduzoglu.husamettin@gmail.com
+}
+
+# Company landing page (placeholder until the real site is built)
+gunduzoglutarim.com, www.gunduzoglutarim.com {
+	root * /srv/site
+	file_server
+	encode gzip
+}
+
+# Backend API (WhatsApp webhook lives here)
+api.gunduzoglutarim.com {
+	reverse_proxy api:3000
+}
+
+# Admin panel placeholder (the panel itself is on the roadmap)
+admin.gunduzoglutarim.com {
+	root * /srv/admin
+	file_server
+	encode gzip
+}
