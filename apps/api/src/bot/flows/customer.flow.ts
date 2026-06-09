@@ -248,8 +248,16 @@ export class CustomerFlow {
         return { nextState: BotState.PRODUCT_DEBT_CATEGORY, data: { productDebt: undefined } };
       case '4':
         return { nextState: BotState.MONETARY_PAYMENT_AMOUNT };
-      case '5':
+      case '5': {
+        // Avoid a dead-end state when there is nothing to settle
+        const openItems = await this.productDebts.openItemsForCustomer(
+          ctx.selectedCustomerId ?? '',
+        );
+        if (openItems.length === 0) {
+          return { replies: [TEXTS.noOpenProductDebts], reprompt: true };
+        }
         return { nextState: BotState.PRODUCT_PAYMENT_PICK_ITEM, data: { productPayment: undefined } };
+      }
       case '6':
         return { nextState: BotState.SEEDLING_ORDER_PLANT, data: { seedlingOrder: undefined } };
       case '7':

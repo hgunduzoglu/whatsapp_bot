@@ -12,6 +12,8 @@ import { FlowRegistry } from './flow-registry.service';
 import { CustomerFlow } from './flows/customer.flow';
 import { MainMenuFlow } from './flows/main-menu.flow';
 import { MonetaryFlow } from './flows/monetary.flow';
+import { ProductDebtFlow } from './flows/product-debt.flow';
+import { ProductPaymentFlow } from './flows/product-payment.flow';
 
 /**
  * Global so that the WhatsApp webhook (in its own module) can resolve the
@@ -35,6 +37,8 @@ import { MonetaryFlow } from './flows/monetary.flow';
     MainMenuFlow,
     CustomerFlow,
     MonetaryFlow,
+    ProductDebtFlow,
+    ProductPaymentFlow,
   ],
   exports: [BotDispatcher],
 })
