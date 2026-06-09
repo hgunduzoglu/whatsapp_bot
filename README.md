@@ -1,6 +1,5 @@
 # WhatsApp Farm CRM & Debt Tracker
 
-[![CI](https://github.com/hgunduzoglu/whatsapp_bot/actions/workflows/ci.yml/badge.svg)](https://github.com/hgunduzoglu/whatsapp_bot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A WhatsApp-based mini CRM and debt tracking system for small agricultural businesses (agro-dealers, seedling nurseries, farm supply shops). The entire system is operated through WhatsApp: the operator manages customers, monetary debts, product (pesticide/fertilizer) debts, payments, seedling orders and promissory notes by simply texting a bot.
@@ -73,7 +72,7 @@ The repository is structured as a monorepo (`apps/api`) so an admin panel (`apps
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/hgunduzoglu/whatsapp_bot.git
+git clone <repository-url>
 cd whatsapp_bot/apps/api
 npm install
 ```

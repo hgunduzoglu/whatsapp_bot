@@ -5,7 +5,7 @@ Thanks for considering a contribution! This project is a deterministic, menu-dri
 ## Development setup
 
 ```bash
-git clone https://github.com/hgunduzoglu/whatsapp_bot.git
+git clone <repository-url>
 cd whatsapp_bot
 cp .env.example .env          # fill in what you need; WHATSAPP_DRY_RUN=true works without Meta credentials
 docker compose up -d postgres redis
