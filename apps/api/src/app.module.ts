@@ -3,6 +3,7 @@ import { AuditModule } from './audit/audit.module';
 import { AppConfigModule } from './config/app-config.module';
 import { CustomersModule } from './customers/customers.module';
 import { HealthModule } from './health/health.module';
+import { MonetaryLedgerModule } from './monetary-ledger/monetary-ledger.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -14,6 +15,7 @@ import { RedisModule } from './redis/redis.module';
     AuditModule,
     HealthModule,
     CustomersModule,
+    MonetaryLedgerModule,
   ],
 })
 export class AppModule {}
