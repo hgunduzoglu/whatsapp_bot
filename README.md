@@ -22,6 +22,8 @@ A WhatsApp-based mini CRM and debt tracking system for small agricultural busine
 | Reminders | 3 days / 1 day before note due dates and 3 days before seedling pickups, via BullMQ delayed jobs + a daily reconciliation sweep |
 | Reports | Daily/weekly summaries, receivables, open product debts, upcoming deliveries/notes, full customer statements |
 | Corrections | Undo (void) or delete any recent transaction with a mandatory reason; everything is soft-deleted and audit-logged |
+| Admin panel | React (Vite) SPA: dashboard, customer management with full ledger actions, seedlings, notes, reports, audit logs and backups — backed by a JWT-protected REST API |
+| Backups | Daily `pg_dump` to any S3-compatible storage (e.g. Cloudflare R2) with daily/weekly/monthly retention |
 
 ### Core accounting rules
 
@@ -55,11 +57,24 @@ Meta WhatsApp Cloud API ──webhook──▶ NestJS API
 
 - **NestJS + TypeScript** — modular service architecture, one module per domain
 - **Prisma + PostgreSQL** — schema in [schema.prisma](apps/api/prisma/schema.prisma)
-- **Redis + BullMQ** — delayed reminder jobs and the daily 08:00 (Istanbul) reconciliation job that re-sends anything the queue missed
-- **Zod** — environment validation at boot
+- **Redis + BullMQ** — delayed reminder jobs, the daily 08:00 (Istanbul) reconciliation job and the backup schedule
+- **Zod** — environment validation at boot and REST body validation
+- **React + Vite + Tailwind + TanStack Query** — the admin panel (`apps/admin`), talking to the JWT-protected REST API
 - All business dates use the **Europe/Istanbul** calendar regardless of server timezone; timestamps are stored in UTC
 
-The repository is structured as a monorepo (`apps/api`) so an admin panel (`apps/admin`) can be added later without restructuring.
+## Admin panel
+
+The admin panel is a separate SPA in `apps/admin`. It does not replace WhatsApp as the main data-entry channel; it exists for browsing, corrections, reports and the occasional manual entry.
+
+```bash
+cd apps/admin
+npm install
+npm run dev          # http://localhost:5173, talks to the API on :3000
+```
+
+Login uses the owner account seeded from `ADMIN_EMAIL` / `ADMIN_PASSWORD` on API boot. The API base URL is injected at build time through `VITE_API_URL` (the production Docker build receives it from `API_DOMAIN`).
+
+Every admin-panel action goes through the same domain services as the bot, so all accounting rules and the audit log apply identically (admin actors are recorded as `admin:<email>`).
 
 ## Getting started
 
@@ -178,6 +193,17 @@ Integration tests cover the accounting rules end to end — including full bot c
 | `REPLY_TO_UNAUTHORIZED` | Reply to strangers (`false` = silently ignore) | `false` |
 | `SESSION_TTL_MINUTES` | Bot session expiry | `30` |
 | `REMINDER_SEND_HOUR` | Hour of day (Istanbul) reminders are sent | `9` |
+| `JWT_SECRET` | Secret for admin JWTs (`openssl rand -hex 32`) | — |
+| `JWT_EXPIRES_IN` | Admin token lifetime | `7d` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Initial owner account, seeded on boot | — |
+| `ADMIN_ORIGINS` | Browser origins allowed by CORS | `http://localhost:5173` |
+| `R2_*` | S3-compatible storage credentials for backups (optional) | — |
+| `BACKUP_CRON` | Backup schedule, Istanbul time | `0 3 * * *` |
+| `ACME_EMAIL`, `SITE_DOMAIN`, `WWW_DOMAIN`, `API_DOMAIN`, `ADMIN_DOMAIN` | Production domains served by Caddy | — |
+
+## Backups
+
+When the `R2_*` variables are set, a BullMQ job runs `pg_dump` on the configured cron (default 03:00 Istanbul) and uploads the archive to `backups/daily/`; Monday runs are copied to `backups/weekly/` and first-of-month runs to `backups/monthly/`. Retention keeps the last 7 daily, 4 weekly and 12 monthly archives. Backups can also be triggered and monitored from the admin panel.
 
 ## Customization
 
@@ -196,7 +222,9 @@ The system is deliberately modular — each concern lives in its own NestJS modu
 apps/api/
   prisma/               # schema + migrations
   src/
-    audit/              # audit logging
+    audit/              # audit logging + audit log endpoint
+    auth/               # JWT auth, global guard, owner seeding
+    backups/            # pg_dump -> S3-compatible storage + retention
     bot/                # state machine core, flows, Turkish texts
     common/             # money/date/normalization utilities, domain errors
     config/             # env validation (Zod) + typed config
@@ -207,11 +235,14 @@ apps/api/
     product-payments/   # product settlements
     promissory-notes/   # owner's own debts
     reminders/          # BullMQ scheduling + reconciliation
-    reports/            # report data assembly
+    reports/            # report data assembly + dashboard
     seedlings/          # seedling orders & debts
     whatsapp/           # webhook, signature check, message sender
   test/                 # integration tests (real PostgreSQL + Redis)
-docker-compose.yml      # postgres (5434), redis (6380), test db (5435)
+apps/admin/             # admin panel SPA (React + Vite + Tailwind)
+deploy/                 # Caddyfile + landing placeholder
+docker-compose.yml      # dev: postgres (5434), redis (6380), test db (5435)
+docker-compose.prod.yml # production stack (Caddy + api + admin + db + redis)
 ```
 
 ## Security notes
@@ -223,10 +254,8 @@ docker-compose.yml      # postgres (5434), redis (6380), test db (5435)
 
 ## Roadmap
 
-- Admin panel (Next.js) for browsing/correcting records and viewing audit logs
-- Automated PostgreSQL backups to Cloudflare R2
 - Template-message-based reminder delivery out of the box
-- JWT-based auth for the admin REST API
+- Company landing page (separate project)
 
 ## Contributing
 
