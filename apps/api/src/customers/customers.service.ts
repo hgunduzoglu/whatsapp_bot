@@ -13,6 +13,15 @@ export interface CreateCustomerInput {
   actorPhone?: string | null;
 }
 
+export interface UpdateCustomerInput {
+  baseName?: string;
+  identifier?: string | null;
+  phone?: string | null;
+  note?: string | null;
+  status?: CustomerStatus;
+  actorPhone?: string | null;
+}
+
 const MAX_SEARCH_RESULTS = 9;
 
 @Injectable()
@@ -105,6 +114,109 @@ export class CustomersService {
       throw new EntityNotFoundError('Customer', id);
     }
     return customer;
+  }
+
+  /** Paginated listing for the admin panel, with optional name search. */
+  async list(query?: string, take = 50, skip = 0): Promise<{ items: Customer[]; total: number }> {
+    const normalized = query ? normalizeName(query) : '';
+    const where = {
+      deletedAt: null,
+      status: { not: CustomerStatus.DELETED },
+      ...(normalized
+        ? {
+            OR: [
+              { normalizedBaseName: { contains: normalized } },
+              { normalizedIdentifier: { contains: normalized } },
+            ],
+          }
+        : {}),
+    };
+    const [items, total] = await Promise.all([
+      this.prisma.customer.findMany({
+        where,
+        orderBy: [{ normalizedBaseName: 'asc' }, { normalizedIdentifier: 'asc' }],
+        take,
+        skip,
+      }),
+      this.prisma.customer.count({ where }),
+    ]);
+    return { items, total };
+  }
+
+  async update(id: string, input: UpdateCustomerInput): Promise<Customer> {
+    const customer = await this.getById(id);
+
+    const baseName = (input.baseName ?? customer.baseName).trim().replace(/\s+/g, ' ');
+    const identifier =
+      input.identifier === undefined
+        ? customer.identifier
+        : input.identifier?.trim().replace(/\s+/g, ' ') || null;
+
+    const normalizedBaseName = normalizeName(baseName);
+    const normalizedIdentifier = identifier ? normalizeName(identifier) : '';
+
+    const conflict = await this.prisma.customer.findUnique({
+      where: {
+        normalizedBaseName_normalizedIdentifier: { normalizedBaseName, normalizedIdentifier },
+      },
+    });
+    if (conflict && conflict.id !== id && conflict.deletedAt === null) {
+      throw new DuplicateCustomerError(customerLabel(baseName, identifier));
+    }
+
+    const updated = await this.prisma.customer.update({
+      where: { id },
+      data: {
+        baseName,
+        identifier,
+        normalizedBaseName,
+        normalizedIdentifier,
+        phone: input.phone === undefined ? customer.phone : input.phone?.trim() || null,
+        note: input.note === undefined ? customer.note : input.note?.trim() || null,
+        status: input.status ?? customer.status,
+      },
+    });
+
+    await this.audit.record({
+      action: 'CUSTOMER_UPDATED',
+      entityType: 'Customer',
+      entityId: id,
+      actorPhone: input.actorPhone,
+      oldValue: {
+        baseName: customer.baseName,
+        identifier: customer.identifier,
+        phone: customer.phone,
+        note: customer.note,
+        status: customer.status,
+      },
+      newValue: {
+        baseName: updated.baseName,
+        identifier: updated.identifier,
+        phone: updated.phone,
+        note: updated.note,
+        status: updated.status,
+      },
+    });
+
+    return updated;
+  }
+
+  async softDelete(id: string, reason: string, actorPhone?: string | null): Promise<void> {
+    const customer = await this.getById(id);
+
+    await this.prisma.customer.update({
+      where: { id },
+      data: { deletedAt: new Date(), status: CustomerStatus.DELETED },
+    });
+
+    await this.audit.record({
+      action: 'CUSTOMER_DELETED',
+      entityType: 'Customer',
+      entityId: id,
+      actorPhone,
+      reason,
+      oldValue: { baseName: customer.baseName, identifier: customer.identifier },
+    });
   }
 
   label(customer: Pick<Customer, 'baseName' | 'identifier'>): string {
