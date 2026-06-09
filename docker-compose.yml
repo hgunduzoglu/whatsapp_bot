@@ -29,7 +29,8 @@ services:
   redis:
     image: redis:7
     ports:
-      - "6379:6379"
+      # 6380 on the host to avoid clashing with a locally installed Redis
+      - "6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
