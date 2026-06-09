@@ -4,6 +4,8 @@ import { AppConfigModule } from './config/app-config.module';
 import { CustomersModule } from './customers/customers.module';
 import { HealthModule } from './health/health.module';
 import { MonetaryLedgerModule } from './monetary-ledger/monetary-ledger.module';
+import { ProductDebtsModule } from './product-debts/product-debts.module';
+import { ProductPaymentsModule } from './product-payments/product-payments.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -16,6 +18,8 @@ import { RedisModule } from './redis/redis.module';
     HealthModule,
     CustomersModule,
     MonetaryLedgerModule,
+    ProductDebtsModule,
+    ProductPaymentsModule,
   ],
 })
 export class AppModule {}
