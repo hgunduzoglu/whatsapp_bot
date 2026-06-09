@@ -1,21 +1,21 @@
 {
-	email gunduzoglu.husamettin@gmail.com
+	email {$ACME_EMAIL}
 }
 
 # Company landing page (placeholder until the real site is built)
-gunduzoglutarim.com, www.gunduzoglutarim.com {
+{$SITE_DOMAIN}, {$WWW_DOMAIN} {
 	root * /srv/site
 	file_server
 	encode gzip
 }
 
 # Backend API (WhatsApp webhook lives here)
-api.gunduzoglutarim.com {
+{$API_DOMAIN} {
 	reverse_proxy api:3000
 }
 
-# Admin panel placeholder (the panel itself is on the roadmap)
-admin.gunduzoglutarim.com {
+# Admin panel
+{$ADMIN_DOMAIN} {
 	root * /srv/admin
 	file_server
 	encode gzip
