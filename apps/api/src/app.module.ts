@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuditModule } from './audit/audit.module';
+import { AuthModule } from './auth/auth.module';
 import { BotModule } from './bot/bot.module';
 import { CorrectionsModule } from './corrections/corrections.module';
 import { AppConfigModule } from './config/app-config.module';
@@ -20,6 +21,7 @@ import { RedisModule } from './redis/redis.module';
     AppConfigModule,
     PrismaModule,
     RedisModule,
+    AuthModule,
     AuditModule,
     HealthModule,
     CustomersModule,

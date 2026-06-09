@@ -33,6 +33,23 @@ export const envSchema = z.object({
   SESSION_TTL_MINUTES: z.coerce.number().int().positive().default(30),
   // Hour of day (Istanbul time) at which scheduled reminders are sent.
   REMINDER_SEND_HOUR: z.coerce.number().int().min(0).max(23).default(9),
+
+  // --- Admin panel API ---
+  JWT_SECRET: z.string().default(''),
+  JWT_EXPIRES_IN: z.string().default('7d'),
+  // Initial owner account, seeded on boot when no such user exists
+  ADMIN_EMAIL: z.string().default(''),
+  ADMIN_PASSWORD: z.string().default(''),
+  // Comma separated origins allowed to call the API from a browser
+  ADMIN_ORIGINS: z.string().default('http://localhost:5173'),
+
+  // --- PostgreSQL backups to Cloudflare R2 (disabled while unset) ---
+  R2_ACCOUNT_ID: z.string().default(''),
+  R2_ACCESS_KEY_ID: z.string().default(''),
+  R2_SECRET_ACCESS_KEY: z.string().default(''),
+  R2_BUCKET_NAME: z.string().default(''),
+  R2_ENDPOINT: z.string().default(''),
+  BACKUP_CRON: z.string().default('0 3 * * *'),
 });
 
 export type Env = z.infer<typeof envSchema>;

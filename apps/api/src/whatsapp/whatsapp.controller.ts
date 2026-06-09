@@ -13,10 +13,13 @@ import {
 import { RawBodyRequest } from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { Request } from 'express';
+import { Public } from '../auth/public.decorator';
 import { AppConfigService } from '../config/app-config.service';
 import { WhatsappWebhookService } from './whatsapp-webhook.service';
 import { WebhookPayload } from './whatsapp.types';
 
+// Meta calls this endpoint; it is verified by token/signature, not by JWT
+@Public()
 @Controller('webhooks/whatsapp')
 export class WhatsappController {
   private readonly logger = new Logger(WhatsappController.name);

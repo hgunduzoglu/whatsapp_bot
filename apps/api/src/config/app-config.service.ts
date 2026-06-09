@@ -20,6 +20,22 @@ export class AppConfigService {
       .filter((phone) => phone.length > 0);
   }
 
+  get adminOrigins(): string[] {
+    return this.get('ADMIN_ORIGINS')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0);
+  }
+
+  get isBackupConfigured(): boolean {
+    return Boolean(
+      this.get('R2_ACCESS_KEY_ID') &&
+        this.get('R2_SECRET_ACCESS_KEY') &&
+        this.get('R2_BUCKET_NAME') &&
+        this.get('R2_ENDPOINT'),
+    );
+  }
+
   get isProduction(): boolean {
     return this.get('NODE_ENV') === 'production';
   }

@@ -1,5 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import Redis from 'ioredis';
+import { Public } from '../auth/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { REDIS_CLIENT } from '../redis/redis.module';
 
@@ -10,6 +11,7 @@ interface HealthReport {
   time: string;
 }
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(
