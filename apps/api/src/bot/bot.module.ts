@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { CorrectionsModule } from '../corrections/corrections.module';
 import { CustomersModule } from '../customers/customers.module';
 import { MonetaryLedgerModule } from '../monetary-ledger/monetary-ledger.module';
 import { ProductDebtsModule } from '../product-debts/product-debts.module';
@@ -11,6 +12,7 @@ import { BotDispatcher } from '../whatsapp/whatsapp.types';
 import { BotRouterService } from './bot-router.service';
 import { BotSessionService } from './bot-session.service';
 import { FlowRegistry } from './flow-registry.service';
+import { CorrectionFlow } from './flows/correction.flow';
 import { CustomerFlow } from './flows/customer.flow';
 import { DateEntryFlow } from './flows/date-entry.flow';
 import { MainMenuFlow } from './flows/main-menu.flow';
@@ -37,6 +39,7 @@ import { SeedlingOrderFlow } from './flows/seedling-order.flow';
     SeedlingsModule,
     PromissoryNotesModule,
     ReportsModule,
+    CorrectionsModule,
   ],
   providers: [
     FlowRegistry,
@@ -53,6 +56,7 @@ import { SeedlingOrderFlow } from './flows/seedling-order.flow';
     SeedlingDebtFlow,
     PromissoryNoteFlow,
     ReportFlow,
+    CorrectionFlow,
   ],
   exports: [BotDispatcher],
 })
