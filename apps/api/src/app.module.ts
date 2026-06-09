@@ -8,6 +8,7 @@ import { ProductDebtsModule } from './product-debts/product-debts.module';
 import { ProductPaymentsModule } from './product-payments/product-payments.module';
 import { PromissoryNotesModule } from './promissory-notes/promissory-notes.module';
 import { SeedlingsModule } from './seedlings/seedlings.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -24,6 +25,7 @@ import { RedisModule } from './redis/redis.module';
     ProductPaymentsModule,
     SeedlingsModule,
     PromissoryNotesModule,
+    WhatsappModule,
   ],
 })
 export class AppModule {}
