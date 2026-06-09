@@ -51,6 +51,14 @@ services:
       redis:
         condition: service_healthy
 
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        VITE_API_URL: https://${API_DOMAIN:?set API_DOMAIN in .env}
+    restart: unless-stopped
+
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -66,11 +74,11 @@ services:
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - ./deploy/site:/srv/site:ro
-      - ./deploy/admin:/srv/admin:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - api
+      - admin
 
 volumes:
   postgres_data:

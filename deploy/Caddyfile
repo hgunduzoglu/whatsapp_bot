@@ -14,9 +14,8 @@
 	reverse_proxy api:3000
 }
 
-# Admin panel
+# Admin panel (SPA served by its own nginx container)
 {$ADMIN_DOMAIN} {
-	root * /srv/admin
-	file_server
+	reverse_proxy admin:80
 	encode gzip
 }
