@@ -1,0 +1,454 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  OWNER
+  ADMIN
+  OPERATOR
+}
+
+model AppUser {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String?  @unique
+  email        String?  @unique
+  passwordHash String?
+  role         UserRole
+  isActive     Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  ledgerEntries MonetaryLedgerEntry[]
+  auditLogs     AuditLog[]
+}
+
+// ---------------------------------------------------------------------------
+// Customers
+// ---------------------------------------------------------------------------
+
+enum CustomerStatus {
+  ACTIVE
+  PASSIVE
+  DELETED
+}
+
+model Customer {
+  id String @id @default(cuid())
+
+  baseName             String
+  identifier           String?
+  normalizedBaseName   String
+  normalizedIdentifier String  @default("")
+
+  phone  String?
+  note   String?
+  status CustomerStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  monetaryEntries  MonetaryLedgerEntry[]
+  productPurchases ProductPurchase[]
+  productPayments  ProductPayment[]
+  seedlingOrders   SeedlingOrder[]
+
+  @@unique([normalizedBaseName, normalizedIdentifier])
+  @@index([normalizedBaseName])
+}
+
+// ---------------------------------------------------------------------------
+// Monetary ledger
+// ---------------------------------------------------------------------------
+
+enum MonetaryLedgerType {
+  DEBT
+  PAYMENT
+  ADJUSTMENT_INCREASE
+  ADJUSTMENT_DECREASE
+}
+
+enum MonetaryLedgerSource {
+  MANUAL
+  SEEDLING_DEBT
+  CORRECTION
+  ADMIN_PANEL
+  WHATSAPP
+}
+
+model MonetaryLedgerEntry {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  type   MonetaryLedgerType
+  source MonetaryLedgerSource
+
+  // All monetary amounts are stored as integer kurus (1 TL = 100 kurus)
+  amountKurus Int
+  description String?
+
+  businessDate    DateTime
+  createdByUserId String?
+  createdByUser   AppUser? @relation(fields: [createdByUserId], references: [id])
+  createdByPhone  String?
+
+  relatedSeedlingOrderId String?
+  relatedSeedlingOrder   SeedlingOrder? @relation(fields: [relatedSeedlingOrderId], references: [id])
+
+  isVoided   Boolean   @default(false)
+  voidedAt   DateTime?
+  voidReason String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([customerId])
+  @@index([businessDate])
+}
+
+// ---------------------------------------------------------------------------
+// Products and product debts
+// ---------------------------------------------------------------------------
+
+enum ProductCategory {
+  MEDICINE
+  FERTILIZER
+  OTHER
+}
+
+enum QuantityUnit {
+  PIECE
+  KG
+  GRAM
+  LITER
+  ML
+  SACK
+  PACKAGE
+}
+
+model Product {
+  id String @id @default(cuid())
+
+  name           String
+  normalizedName String
+  category       ProductCategory
+  defaultUnit    QuantityUnit?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  purchaseItems ProductPurchaseItem[]
+
+  @@unique([normalizedName, category])
+}
+
+enum ProductPurchaseStatus {
+  OPEN
+  PARTIALLY_PAID
+  PAID
+  VOIDED
+}
+
+model ProductPurchase {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  businessDate DateTime
+  note         String?
+
+  // Optional, informational only. Never affects the monetary balance.
+  estimatedAmountKurus Int?
+
+  status ProductPurchaseStatus @default(OPEN)
+
+  items ProductPurchaseItem[]
+
+  isVoided   Boolean   @default(false)
+  voidedAt   DateTime?
+  voidReason String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([customerId])
+  @@index([businessDate])
+}
+
+model ProductPurchaseItem {
+  id String @id @default(cuid())
+
+  productPurchaseId String
+  productPurchase   ProductPurchase @relation(fields: [productPurchaseId], references: [id])
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  productName           String
+  normalizedProductName String
+  category              ProductCategory
+
+  quantity          Decimal      @db.Decimal(12, 3)
+  remainingQuantity Decimal      @db.Decimal(12, 3)
+  unit              QuantityUnit
+
+  paymentItems ProductPaymentItem[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([productPurchaseId])
+  @@index([normalizedProductName])
+}
+
+// ---------------------------------------------------------------------------
+// Product payments (never touch the monetary ledger)
+// ---------------------------------------------------------------------------
+
+model ProductPayment {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  businessDate     DateTime
+  // Accounting value of the payment, informational only
+  totalAmountKurus Int
+  note             String?
+
+  items ProductPaymentItem[]
+
+  isVoided   Boolean   @default(false)
+  voidedAt   DateTime?
+  voidReason String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([customerId])
+  @@index([businessDate])
+}
+
+model ProductPaymentItem {
+  id String @id @default(cuid())
+
+  productPaymentId String
+  productPayment   ProductPayment @relation(fields: [productPaymentId], references: [id])
+
+  productPurchaseItemId String
+  productPurchaseItem   ProductPurchaseItem @relation(fields: [productPurchaseItemId], references: [id])
+
+  paidQuantity Decimal @db.Decimal(12, 3)
+  amountKurus  Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([productPaymentId])
+  @@index([productPurchaseItemId])
+}
+
+// ---------------------------------------------------------------------------
+// Seedling orders
+// ---------------------------------------------------------------------------
+
+enum SeedUnit {
+  ENVELOPE
+  GRAM
+}
+
+enum SeedlingOrderStatus {
+  PENDING
+  REMINDED
+  DELIVERED
+  CANCELLED
+  VOIDED
+}
+
+model SeedlingOrder {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  plantName           String
+  normalizedPlantName String
+
+  seedGiven     Boolean   @default(false)
+  seedPlantName String?
+  seedAmount    Decimal?  @db.Decimal(12, 3)
+  seedUnit      SeedUnit?
+
+  requestedPickupDate DateTime
+
+  status SeedlingOrderStatus @default(PENDING)
+  note   String?
+
+  monetaryEntries MonetaryLedgerEntry[]
+
+  isVoided   Boolean   @default(false)
+  voidedAt   DateTime?
+  voidReason String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([customerId])
+  @@index([requestedPickupDate])
+}
+
+// ---------------------------------------------------------------------------
+// Promissory notes (owner's own debts, not customer debts)
+// ---------------------------------------------------------------------------
+
+enum PromissoryNoteStatus {
+  PENDING
+  PAID
+  CANCELLED
+  VOIDED
+}
+
+model PromissoryNote {
+  id String @id @default(cuid())
+
+  payeeName           String
+  normalizedPayeeName String
+
+  amountKurus Int
+  dueDate     DateTime
+  status      PromissoryNoteStatus @default(PENDING)
+  note        String?
+
+  paidAt DateTime?
+
+  isVoided   Boolean   @default(false)
+  voidedAt   DateTime?
+  voidReason String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([dueDate])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Bot session (persisted state machine snapshot)
+// ---------------------------------------------------------------------------
+
+model BotSession {
+  id String @id @default(cuid())
+
+  whatsappPhone      String  @unique
+  state              String
+  selectedCustomerId String?
+  temporaryData      Json?
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Incoming WhatsApp messages (idempotency + debugging)
+// ---------------------------------------------------------------------------
+
+model IncomingWhatsappMessage {
+  id String @id @default(cuid())
+
+  whatsappMessageId String @unique
+  fromPhone         String
+  messageType       String
+  rawPayload        Json
+
+  processedAt     DateTime?
+  processingError String?
+
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Reminders
+// ---------------------------------------------------------------------------
+
+enum ReminderType {
+  PROMISSORY_NOTE_3_DAYS
+  PROMISSORY_NOTE_1_DAY
+  SEEDLING_PICKUP_3_DAYS
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model Reminder {
+  id String @id @default(cuid())
+
+  type           ReminderType
+  targetEntityId String
+
+  scheduledFor DateTime
+  sentAt       DateTime?
+  status       ReminderStatus @default(PENDING)
+
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([type, targetEntityId, scheduledFor])
+  @@index([scheduledFor])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Audit log
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id String @id @default(cuid())
+
+  userId String?
+  user   AppUser? @relation(fields: [userId], references: [id])
+
+  actorPhone String?
+  action     String
+  entityType String
+  entityId   String
+
+  oldValue Json?
+  newValue Json?
+  reason   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

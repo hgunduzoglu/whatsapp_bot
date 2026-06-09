@@ -6,7 +6,8 @@ services:
       POSTGRES_PASSWORD: app
       POSTGRES_DB: whatsapp_crm
     ports:
-      - "5432:5432"
+      # 5434 on the host to avoid clashing with a locally installed PostgreSQL
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,7 +24,7 @@ services:
       POSTGRES_PASSWORD: app
       POSTGRES_DB: whatsapp_crm_test
     ports:
-      - "5433:5432"
+      - "5435:5432"
 
   redis:
     image: redis:7
