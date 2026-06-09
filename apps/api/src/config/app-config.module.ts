@@ -9,7 +9,9 @@ import { validateEnv } from './env.validation';
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
-      envFilePath: ['.env'],
+      // The canonical .env lives at the repo root; an app-local .env can
+      // override it during development.
+      envFilePath: ['.env', '../../.env'],
     }),
   ],
   providers: [AppConfigService],

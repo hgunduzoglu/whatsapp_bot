@@ -19,6 +19,8 @@ export const envSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().default(''),
   WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().default(''),
   WHATSAPP_APP_SECRET: z.string().default(''),
+  // Meta's sandbox sender number, informational only
+  WHATSAPP_TEST_PHONE_NUMBER: z.string().default(''),
   // When true, outgoing messages are logged instead of being sent to Meta.
   WHATSAPP_DRY_RUN: booleanString,
 
