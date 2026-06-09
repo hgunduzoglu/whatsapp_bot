@@ -5,6 +5,7 @@ import { AlreadyVoidedError, EntityNotFoundError } from '../common/errors';
 import { businessDateAfterDays, todayBusinessDate } from '../common/utils/date.util';
 import { normalizeName } from '../common/utils/normalize.util';
 import { PrismaService } from '../prisma/prisma.service';
+import { RemindersService } from '../reminders/reminders.service';
 
 export interface CreatePromissoryNoteInput {
   payeeName: string;
@@ -28,6 +29,7 @@ export class PromissoryNotesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly reminders: RemindersService,
   ) {}
 
   async create(input: CreatePromissoryNoteInput): Promise<PromissoryNote> {
@@ -54,6 +56,9 @@ export class PromissoryNotesService {
         dueDate: input.dueDate.toISOString(),
       },
     });
+
+    // 3 days and 1 day before the due date
+    await this.reminders.scheduleForPromissoryNote(note);
 
     return note;
   }
@@ -121,6 +126,9 @@ export class PromissoryNotesService {
       newValue: { status: PromissoryNoteStatus.PAID },
     });
 
+    // Paid notes must not produce reminders
+    await this.reminders.cancelForTarget(id);
+
     return updated;
   }
 
@@ -147,6 +155,8 @@ export class PromissoryNotesService {
       actorPhone,
       reason,
     });
+
+    await this.reminders.cancelForTarget(id);
   }
 
   async softDeleteNote(id: string, reason: string, actorPhone?: string | null): Promise<void> {
@@ -163,5 +173,7 @@ export class PromissoryNotesService {
       actorPhone,
       reason,
     });
+
+    await this.reminders.cancelForTarget(id);
   }
 }

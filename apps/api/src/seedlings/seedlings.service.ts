@@ -13,6 +13,7 @@ import { businessDateAfterDays, todayBusinessDate } from '../common/utils/date.u
 import { normalizeName } from '../common/utils/normalize.util';
 import { MonetaryLedgerService } from '../monetary-ledger/monetary-ledger.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RemindersService } from '../reminders/reminders.service';
 
 export interface CreateSeedlingOrderInput {
   customerId: string;
@@ -52,6 +53,7 @@ export class SeedlingsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly monetaryLedger: MonetaryLedgerService,
+    private readonly reminders: RemindersService,
   ) {}
 
   /**
@@ -90,6 +92,9 @@ export class SeedlingsService {
         requestedPickupDate: input.requestedPickupDate.toISOString(),
       },
     });
+
+    // 3 days before the requested pickup date
+    await this.reminders.scheduleForSeedlingOrder(order);
 
     return order;
   }
@@ -190,6 +195,10 @@ export class SeedlingsService {
       newValue: { status },
     });
 
+    if (status === SeedlingOrderStatus.DELIVERED || status === SeedlingOrderStatus.CANCELLED) {
+      await this.reminders.cancelForTarget(id);
+    }
+
     return updated;
   }
 
@@ -216,6 +225,8 @@ export class SeedlingsService {
       actorPhone,
       reason,
     });
+
+    await this.reminders.cancelForTarget(id);
   }
 
   async softDeleteOrder(id: string, reason: string, actorPhone?: string | null): Promise<void> {
@@ -232,5 +243,7 @@ export class SeedlingsService {
       actorPhone,
       reason,
     });
+
+    await this.reminders.cancelForTarget(id);
   }
 }
