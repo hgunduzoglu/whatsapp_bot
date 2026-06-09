@@ -429,6 +429,31 @@ model Reminder {
 }
 
 // ---------------------------------------------------------------------------
+// Database backups (uploaded to S3-compatible storage, e.g. Cloudflare R2)
+// ---------------------------------------------------------------------------
+
+enum BackupStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model Backup {
+  id String @id @default(cuid())
+
+  fileName     String
+  trigger      String // SCHEDULED | MANUAL
+  sizeBytes    Int?
+  status       BackupStatus @default(RUNNING)
+  errorMessage String?
+
+  createdAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
 // Audit log
 // ---------------------------------------------------------------------------
 

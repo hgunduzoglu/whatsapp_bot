@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
+import { BackupsModule } from './backups/backups.module';
 import { BotModule } from './bot/bot.module';
 import { CorrectionsModule } from './corrections/corrections.module';
 import { AppConfigModule } from './config/app-config.module';
@@ -34,6 +35,7 @@ import { RedisModule } from './redis/redis.module';
     CorrectionsModule,
     WhatsappModule,
     BotModule,
+    BackupsModule,
   ],
 })
 export class AppModule {}

@@ -17,6 +17,9 @@ FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
+# pg_dump is needed for the database backup job
+RUN apk add --no-cache postgresql16-client
+
 COPY apps/api/package.json apps/api/package-lock.json ./
 RUN npm ci --omit=dev
 
