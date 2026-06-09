@@ -4,6 +4,7 @@ import { MonetaryLedgerModule } from '../monetary-ledger/monetary-ledger.module'
 import { ProductDebtsModule } from '../product-debts/product-debts.module';
 import { ProductPaymentsModule } from '../product-payments/product-payments.module';
 import { PromissoryNotesModule } from '../promissory-notes/promissory-notes.module';
+import { ReportsModule } from '../reports/reports.module';
 import { SeedlingsModule } from '../seedlings/seedlings.module';
 import { WhatsappModule } from '../whatsapp/whatsapp.module';
 import { BotDispatcher } from '../whatsapp/whatsapp.types';
@@ -17,6 +18,7 @@ import { MonetaryFlow } from './flows/monetary.flow';
 import { ProductDebtFlow } from './flows/product-debt.flow';
 import { ProductPaymentFlow } from './flows/product-payment.flow';
 import { PromissoryNoteFlow } from './flows/promissory-note.flow';
+import { ReportFlow } from './flows/report.flow';
 import { SeedlingDebtFlow } from './flows/seedling-debt.flow';
 import { SeedlingOrderFlow } from './flows/seedling-order.flow';
 
@@ -34,6 +36,7 @@ import { SeedlingOrderFlow } from './flows/seedling-order.flow';
     ProductPaymentsModule,
     SeedlingsModule,
     PromissoryNotesModule,
+    ReportsModule,
   ],
   providers: [
     FlowRegistry,
@@ -49,6 +52,7 @@ import { SeedlingOrderFlow } from './flows/seedling-order.flow';
     SeedlingOrderFlow,
     SeedlingDebtFlow,
     PromissoryNoteFlow,
+    ReportFlow,
   ],
   exports: [BotDispatcher],
 })
