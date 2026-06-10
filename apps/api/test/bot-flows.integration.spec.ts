@@ -46,21 +46,32 @@ describe('Bot conversations (integration)', () => {
     // Name is all the bot asks for; the confirm screen follows directly
     expect(await send('Mehmet Ali')).toContain('Müşteri kaydedilecek');
 
+    // Completed operations land back on the main menu
     const afterConfirm = await send('1');
     expect(afterConfirm).toContain('Müşteri kaydedildi: Mehmet Ali');
-    expect(afterConfirm).toContain('Seçili müşteri: Mehmet Ali');
+    expect(afterConfirm).toContain('Ana Menü');
 
-    // Add a 2.300 TL debt
+    // Add a 2.300 TL debt: select the customer again from the main menu
+    await send('1'); // customer menu
+    await send('2'); // pick customer
+    await send('mehmet');
+    expect(await send('1')).toContain('Seçili müşteri: Mehmet Ali');
     expect(await send('2')).toContain(TEXTS.askDebtAmount);
     expect(await send('2.300')).toContain(TEXTS.askDescription);
     const confirm = await send('alışveriş');
     expect(confirm).toContain('2.300 TL borç eklenecek');
-    expect(await send('1')).toContain(TEXTS.debtSaved);
+    const afterDebt = await send('1');
+    expect(afterDebt).toContain(TEXTS.debtSaved);
+    expect(afterDebt).toContain('Ana Menü');
 
     const [customer] = await customers.search('mehmet');
     expect(await ledger.balance(customer.id)).toBe(230_000);
 
     // Debt overview shows the new balance
+    await send('1');
+    await send('2');
+    await send('mehmet');
+    await send('1');
     const overview = await send('1');
     expect(overview).toContain('Parasal bakiye');
     expect(overview).toContain('2.300 TL');
@@ -132,13 +143,17 @@ describe('Bot conversations (integration)', () => {
     expect(added).toContain('Eklendi:');
     expect(added).toContain('X ilacı - 3 adet');
 
-    await send('bitti');
-    await send('0'); // note
-    await send('2'); // no estimated value; confirm screen is shown
+    // "bitti" leads straight to the confirm screen
+    expect(await send('bitti')).toContain('Kaydedilecek ürün borcu');
     const saved = await send('1');
     expect(saved).toContain(TEXTS.productDebtSaved);
+    expect(saved).toContain('Ana Menü');
 
-    // Settle 1 piece for 2.000 TL
+    // Settle 1 piece for 2.000 TL: re-select the customer first
+    await send('1');
+    await send('2');
+    await send('mehmet');
+    await send('1');
     const pickList = await send('5');
     expect(pickList).toContain('X ilacı');
     await send('1'); // pick item

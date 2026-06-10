@@ -184,8 +184,7 @@ export class CorrectionFlow {
     await this.corrections.voidTransaction(target.kind, target.id, 'Geri alındı', ctx.phone);
     return {
       replies: [TEXTS.undoDone],
-      nextState: BotState.CORRECTION_MENU,
-      data: { correctionTarget: undefined },
+      nextState: BotState.MAIN_MENU,
     };
   }
 
@@ -229,8 +228,7 @@ export class CorrectionFlow {
     await this.corrections.deleteTransaction(target.kind, target.id, reason, ctx.phone);
     return {
       replies: [TEXTS.deleteDone],
-      nextState: BotState.CORRECTION_MENU,
-      data: { correctionTarget: undefined, deleteReason: undefined, correctionOptions: undefined },
+      nextState: BotState.MAIN_MENU,
     };
   }
 
@@ -301,13 +299,7 @@ export class CorrectionFlow {
 
     return {
       replies: [TEXTS.adjustSaved],
-      nextState: BotState.CORRECTION_MENU,
-      data: {
-        adjustCustomerId: undefined,
-        adjustDirection: undefined,
-        adjustAmountKurus: undefined,
-        adjustReason: undefined,
-      },
+      nextState: BotState.MAIN_MENU,
     };
   }
 }

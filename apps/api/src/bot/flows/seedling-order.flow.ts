@@ -182,7 +182,7 @@ export class SeedlingOrderFlow {
 
   private async handleConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -203,7 +203,7 @@ export class SeedlingOrderFlow {
 
     return {
       replies: [TEXTS.seedlingOrderSaved],
-      nextState: BotState.CUSTOMER_ACTIONS,
+      nextState: BotState.MAIN_MENU,
       data: { seedlingOrder: undefined, dateEntry: undefined },
     };
   }

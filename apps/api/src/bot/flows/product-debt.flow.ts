@@ -2,12 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ProductCategory, QuantityUnit } from '@prisma/client';
 import { CustomersService } from '../../customers/customers.service';
 import { formatBusinessDate, todayBusinessDate } from '../../common/utils/date.util';
-import {
-  formatKurus,
-  formatQuantity,
-  parseMoneyInput,
-  parseQuantityInput,
-} from '../../common/utils/money.util';
+import { formatQuantity, parseQuantityInput } from '../../common/utils/money.util';
 import { isValidName, normalizeName } from '../../common/utils/normalize.util';
 import { ProductDebtsService } from '../../product-debts/product-debts.service';
 import { BotState } from '../bot-state.enum';
@@ -44,8 +39,6 @@ interface ProductDebtDraft {
   items: DraftItem[];
   pendingName?: string;
   pendingQuantity?: number;
-  note?: string | null;
-  estimateKurus?: number | null;
 }
 
 @Injectable()
@@ -72,18 +65,6 @@ export class ProductDebtFlow {
     registry.register(BotState.PRODUCT_DEBT_ITEM_UNIT, {
       prompt: () => [TEXTS.askProductUnit],
       handle: (ctx) => this.handleItemUnit(ctx),
-    });
-    registry.register(BotState.PRODUCT_DEBT_NOTE, {
-      prompt: () => [TEXTS.askDescription],
-      handle: (ctx) => this.handleNote(ctx),
-    });
-    registry.register(BotState.PRODUCT_DEBT_ESTIMATE_CHOICE, {
-      prompt: () => [TEXTS.askEstimateChoice],
-      handle: (ctx) => this.handleEstimateChoice(ctx),
-    });
-    registry.register(BotState.PRODUCT_DEBT_ESTIMATE_AMOUNT, {
-      prompt: () => [TEXTS.askEstimateAmount],
-      handle: (ctx) => this.handleEstimateAmount(ctx),
     });
     registry.register(BotState.PRODUCT_DEBT_CONFIRM, {
       prompt: (ctx) => this.promptConfirm(ctx),
@@ -121,9 +102,9 @@ export class ProductDebtFlow {
     // "bitti" is a reserved command, never a product name
     if (normalizeName(ctx.input) === FINISH_COMMAND) {
       if (draft.items.length === 0) {
-        return { replies: [TEXTS.emptyProductList], nextState: BotState.CUSTOMER_ACTIONS };
+        return { replies: [TEXTS.emptyProductList], nextState: BotState.MAIN_MENU };
       }
-      return { nextState: BotState.PRODUCT_DEBT_NOTE };
+      return { nextState: BotState.PRODUCT_DEBT_CONFIRM };
     }
 
     if (!isValidName(ctx.input)) {
@@ -168,32 +149,6 @@ export class ProductDebtFlow {
     };
   }
 
-  private async handleNote(ctx: FlowContext): Promise<FlowResult> {
-    const draft = this.draft(ctx);
-    draft.note = ctx.input === '0' ? null : ctx.input;
-    return { data: this.save(draft), nextState: BotState.PRODUCT_DEBT_ESTIMATE_CHOICE };
-  }
-
-  private async handleEstimateChoice(ctx: FlowContext): Promise<FlowResult> {
-    if (ctx.input === '1') {
-      return { nextState: BotState.PRODUCT_DEBT_ESTIMATE_AMOUNT };
-    }
-    if (ctx.input === '2') {
-      return { nextState: BotState.PRODUCT_DEBT_CONFIRM };
-    }
-    return { replies: [TEXTS.invalidOption], reprompt: true };
-  }
-
-  private async handleEstimateAmount(ctx: FlowContext): Promise<FlowResult> {
-    const amountKurus = parseMoneyInput(ctx.input);
-    if (amountKurus === null) {
-      return { replies: [TEXTS.invalidAmount] };
-    }
-    const draft = this.draft(ctx);
-    draft.estimateKurus = amountKurus;
-    return { data: this.save(draft), nextState: BotState.PRODUCT_DEBT_CONFIRM };
-  }
-
   private async promptConfirm(ctx: FlowContext): Promise<string[]> {
     const draft = this.draft(ctx);
     const customer = await this.customers.getById(ctx.selectedCustomerId ?? '');
@@ -206,15 +161,13 @@ export class ProductDebtFlow {
         this.customers.label(customer),
         formatBusinessDate(todayBusinessDate()),
         itemLines,
-        draft.note ?? TEXTS.noDescription,
-        draft.estimateKurus != null ? formatKurus(draft.estimateKurus) : null,
       ),
     ];
   }
 
   private async handleConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -229,14 +182,12 @@ export class ProductDebtFlow {
         quantity: item.quantity,
         unit: item.unit,
       })),
-      note: draft.note ?? null,
-      estimatedAmountKurus: draft.estimateKurus ?? null,
       actorPhone: ctx.phone,
     });
 
     return {
       replies: [TEXTS.productDebtSaved],
-      nextState: BotState.CUSTOMER_ACTIONS,
+      nextState: BotState.MAIN_MENU,
       data: { productDebt: undefined },
     };
   }

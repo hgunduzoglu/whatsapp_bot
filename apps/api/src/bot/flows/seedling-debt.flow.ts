@@ -142,7 +142,7 @@ export class SeedlingDebtFlow {
 
   private async handleConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -164,7 +164,7 @@ export class SeedlingDebtFlow {
 
     return {
       replies: [TEXTS.seedlingDebtSaved(formatKurus(total))],
-      nextState: BotState.CUSTOMER_ACTIONS,
+      nextState: BotState.MAIN_MENU,
       data: { seedlingDebt: undefined },
     };
   }

@@ -146,11 +146,10 @@ export class CustomerFlow {
       actorPhone: ctx.phone,
     });
 
+    // Completed operations always land back on the main menu
     return {
       replies: [TEXTS.customerSaved(this.customers.label(customer))],
-      selectedCustomerId: customer.id,
-      nextState: BotState.CUSTOMER_ACTIONS,
-      data: { newCustomer: undefined },
+      nextState: BotState.MAIN_MENU,
     };
   }
 

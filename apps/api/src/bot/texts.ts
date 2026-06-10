@@ -173,17 +173,7 @@ export const TEXTS = {
   ].join('\n'),
   productItemAdded: (line: string): string => ['Eklendi:', line].join('\n'),
   emptyProductList: 'Hiç ürün eklenmedi. İşlem iptal edildi.',
-  askEstimateChoice: ['Opsiyonel tahmini TL değeri girmek ister misiniz?', '', '1) Evet', '2) Hayır'].join(
-    '\n',
-  ),
-  askEstimateAmount: 'Tahmini TL değerini yazınız:',
-  productDebtConfirm: (
-    label: string,
-    date: string,
-    itemLines: string[],
-    note: string,
-    estimate: string | null,
-  ): string =>
+  productDebtConfirm: (label: string, date: string, itemLines: string[]): string =>
     [
       'Kaydedilecek ürün borcu:',
       '',
@@ -191,9 +181,6 @@ export const TEXTS = {
       `Tarih: ${date}`,
       '',
       ...itemLines,
-      '',
-      `Açıklama: ${note}`,
-      ...(estimate ? [`Tahmini değer: ${estimate}`, 'Bu değer parasal bakiyeyi etkilemez.'] : []),
       '',
       '1) Onayla',
       '2) İptal',

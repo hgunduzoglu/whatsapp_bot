@@ -116,7 +116,7 @@ export class ProductPaymentFlow {
   private async handlePickItem(ctx: FlowContext): Promise<FlowResult> {
     const items = await this.selectableItems(ctx);
     if (items.length === 0) {
-      return { nextState: BotState.CUSTOMER_ACTIONS };
+      return { nextState: BotState.MAIN_MENU };
     }
 
     const index = Number(ctx.input);
@@ -138,7 +138,7 @@ export class ProductPaymentFlow {
     const draft = this.draft(ctx);
     const pending = draft.pendingItem;
     if (!pending) {
-      return { replies: [TEXTS.genericError], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.genericError], nextState: BotState.MAIN_MENU };
     }
     if (quantity > pending.remaining) {
       return { replies: [TEXTS.excessiveQuantity] };
@@ -160,7 +160,7 @@ export class ProductPaymentFlow {
     const draft = this.draft(ctx);
     const pending = draft.pendingItem;
     if (!pending || draft.pendingQuantity == null) {
-      return { replies: [TEXTS.genericError], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.genericError], nextState: BotState.MAIN_MENU };
     }
 
     draft.allocations.push({
@@ -214,7 +214,7 @@ export class ProductPaymentFlow {
 
   private async handleConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -222,7 +222,7 @@ export class ProductPaymentFlow {
 
     const draft = this.draft(ctx);
     if (draft.allocations.length === 0) {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
 
     await this.productPayments.createPayment({
@@ -237,7 +237,7 @@ export class ProductPaymentFlow {
 
     return {
       replies: [TEXTS.productPaymentSaved],
-      nextState: BotState.CUSTOMER_ACTIONS,
+      nextState: BotState.MAIN_MENU,
       data: { productPayment: undefined },
     };
   }

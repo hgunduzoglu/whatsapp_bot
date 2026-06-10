@@ -79,7 +79,7 @@ export class MonetaryFlow {
 
   private async handleDebtConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -94,7 +94,7 @@ export class MonetaryFlow {
 
     return {
       replies: [TEXTS.debtSaved],
-      nextState: BotState.CUSTOMER_ACTIONS,
+      nextState: BotState.MAIN_MENU,
       data: { debtAmountKurus: undefined, debtDescription: undefined },
     };
   }
@@ -127,7 +127,7 @@ export class MonetaryFlow {
 
   private async handlePaymentConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.CUSTOMER_ACTIONS };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -142,7 +142,7 @@ export class MonetaryFlow {
 
     return {
       replies: [TEXTS.paymentSaved],
-      nextState: BotState.CUSTOMER_ACTIONS,
+      nextState: BotState.MAIN_MENU,
       data: { paymentAmountKurus: undefined, paymentDescription: undefined },
     };
   }

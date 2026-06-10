@@ -216,7 +216,7 @@ export class PromissoryNoteFlow {
 
   private async handleConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.NOTES_MENU };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -233,7 +233,7 @@ export class PromissoryNoteFlow {
 
     return {
       replies: [TEXTS.noteSaved],
-      nextState: BotState.NOTES_MENU,
+      nextState: BotState.MAIN_MENU,
       data: { noteDraft: undefined, dateEntry: undefined },
     };
   }
@@ -279,7 +279,7 @@ export class PromissoryNoteFlow {
 
   private async handleMarkPaidConfirm(ctx: FlowContext): Promise<FlowResult> {
     if (ctx.input === '2') {
-      return { replies: [TEXTS.operationCancelled], nextState: BotState.NOTES_MENU };
+      return { replies: [TEXTS.operationCancelled], nextState: BotState.MAIN_MENU };
     }
     if (ctx.input !== '1') {
       return { replies: [TEXTS.invalidOption], reprompt: true };
@@ -287,13 +287,13 @@ export class PromissoryNoteFlow {
 
     const selected = ctx.data.selectedNote as NoteOption | undefined;
     if (!selected) {
-      return { replies: [TEXTS.genericError], nextState: BotState.NOTES_MENU };
+      return { replies: [TEXTS.genericError], nextState: BotState.MAIN_MENU };
     }
 
     await this.notes.markPaid(selected.id, ctx.phone);
     return {
       replies: [TEXTS.noteMarkedPaid],
-      nextState: BotState.NOTES_MENU,
+      nextState: BotState.MAIN_MENU,
       data: { selectedNote: undefined, noteOptions: undefined },
     };
   }
