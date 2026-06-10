@@ -23,6 +23,7 @@ import { PromissoryNoteFlow } from './flows/promissory-note.flow';
 import { ReportFlow } from './flows/report.flow';
 import { SeedlingDebtFlow } from './flows/seedling-debt.flow';
 import { SeedlingOrderFlow } from './flows/seedling-order.flow';
+import { TutorialFlow } from './flows/tutorial.flow';
 
 /**
  * Global so that the WhatsApp webhook (in its own module) can resolve the
@@ -57,6 +58,7 @@ import { SeedlingOrderFlow } from './flows/seedling-order.flow';
     PromissoryNoteFlow,
     ReportFlow,
     CorrectionFlow,
+    TutorialFlow,
   ],
   exports: [BotDispatcher],
 })
