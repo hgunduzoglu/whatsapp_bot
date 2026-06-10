@@ -20,8 +20,6 @@ interface CustomerMatch {
 interface NewCustomerDraft {
   baseName: string;
   identifier?: string;
-  phone?: string;
-  note?: string;
 }
 
 @Injectable()
@@ -45,14 +43,6 @@ export class CustomerFlow {
     registry.register(BotState.CUSTOMER_ADD_IDENTIFIER, {
       prompt: () => [TEXTS.askIdentifier],
       handle: (ctx) => this.handleAddIdentifier(ctx),
-    });
-    registry.register(BotState.CUSTOMER_ADD_PHONE, {
-      prompt: () => [TEXTS.askCustomerPhone],
-      handle: (ctx) => this.handleAddPhone(ctx),
-    });
-    registry.register(BotState.CUSTOMER_ADD_NOTE, {
-      prompt: () => [TEXTS.askCustomerNote],
-      handle: (ctx) => this.handleAddNote(ctx),
     });
     registry.register(BotState.CUSTOMER_ADD_CONFIRM, {
       prompt: (ctx) => this.promptAddConfirm(ctx),
@@ -116,7 +106,7 @@ export class CustomerFlow {
         nextState: BotState.CUSTOMER_ADD_IDENTIFIER,
       };
     }
-    return { data: { newCustomer: draft }, nextState: BotState.CUSTOMER_ADD_PHONE };
+    return { data: { newCustomer: draft }, nextState: BotState.CUSTOMER_ADD_CONFIRM };
   }
 
   private async handleAddIdentifier(ctx: FlowContext): Promise<FlowResult> {
@@ -125,26 +115,6 @@ export class CustomerFlow {
     }
     const draft = this.draft(ctx);
     draft.identifier = ctx.input.trim();
-    return { data: { newCustomer: draft }, nextState: BotState.CUSTOMER_ADD_PHONE };
-  }
-
-  private async handleAddPhone(ctx: FlowContext): Promise<FlowResult> {
-    const draft = this.draft(ctx);
-    if (ctx.input !== '0') {
-      const digits = ctx.input.replace(/[\s()-]/g, '');
-      if (!/^\+?\d{7,15}$/.test(digits)) {
-        return { replies: ['Geçersiz telefon numarası. Tekrar yazınız veya 0 ile geçiniz:'] };
-      }
-      draft.phone = digits;
-    }
-    return { data: { newCustomer: draft }, nextState: BotState.CUSTOMER_ADD_NOTE };
-  }
-
-  private async handleAddNote(ctx: FlowContext): Promise<FlowResult> {
-    const draft = this.draft(ctx);
-    if (ctx.input !== '0') {
-      draft.note = ctx.input;
-    }
     return { data: { newCustomer: draft }, nextState: BotState.CUSTOMER_ADD_CONFIRM };
   }
 
@@ -155,8 +125,6 @@ export class CustomerFlow {
       '',
       `İsim: ${draft.baseName}`,
       ...(draft.identifier ? [`Ayırt edici bilgi: ${draft.identifier}`] : []),
-      `Telefon: ${draft.phone ?? '-'}`,
-      `Not: ${draft.note ?? '-'}`,
       '',
       TEXTS.confirmOptions,
     ];
@@ -175,8 +143,6 @@ export class CustomerFlow {
     const customer = await this.customers.create({
       baseName: draft.baseName,
       identifier: draft.identifier ?? null,
-      phone: draft.phone ?? null,
-      note: draft.note ?? null,
       actorPhone: ctx.phone,
     });
 

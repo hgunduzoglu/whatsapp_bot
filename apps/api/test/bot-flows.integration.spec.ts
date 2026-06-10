@@ -43,9 +43,8 @@ describe('Bot conversations (integration)', () => {
 
     expect(await send('1')).toContain('Müşteri İşlemleri');
     expect(await send('1')).toContain(TEXTS.askCustomerName);
-    expect(await send('Mehmet Ali')).toContain(TEXTS.askCustomerPhone);
-    expect(await send('0')).toContain(TEXTS.askCustomerNote);
-    expect(await send('0')).toContain('Müşteri kaydedilecek');
+    // Name is all the bot asks for; the confirm screen follows directly
+    expect(await send('Mehmet Ali')).toContain('Müşteri kaydedilecek');
 
     const afterConfirm = await send('1');
     expect(afterConfirm).toContain('Müşteri kaydedildi: Mehmet Ali');
@@ -77,9 +76,7 @@ describe('Bot conversations (integration)', () => {
     expect(duplicateReply).toContain('Bu isimde bir müşteri zaten var');
     expect(duplicateReply).toContain(TEXTS.askIdentifier);
 
-    expect(await send('Karadere')).toContain(TEXTS.askCustomerPhone);
-    await send('0');
-    await send('0');
+    expect(await send('Karadere')).toContain('Müşteri kaydedilecek');
     const saved = await send('1');
     expect(saved).toContain('Mehmet Ali - Karadere');
   });

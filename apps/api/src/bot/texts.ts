@@ -108,8 +108,6 @@ export const TEXTS = {
     '- baba adı',
   ].join('\n'),
   askIdentifier: 'Ayırt edici bilgiyi yazınız:',
-  askCustomerPhone: 'Telefon numarasını yazınız veya geçmek için 0 yazınız:',
-  askCustomerNote: 'Not yazınız veya geçmek için 0 yazınız:',
   customerSaved: (label: string): string => `Müşteri kaydedildi: ${label}`,
   askSearchQuery: 'Müşteri adını yazınız:',
   noCustomerMatches: [
