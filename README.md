@@ -240,7 +240,7 @@ apps/api/
     whatsapp/           # webhook, signature check, message sender
   test/                 # integration tests (real PostgreSQL + Redis)
 apps/admin/             # admin panel SPA (React + Vite + Tailwind)
-deploy/                 # Caddyfile + landing placeholder
+deploy/                 # Caddyfile (API + admin panel)
 docker-compose.yml      # dev: postgres (5434), redis (6380), test db (5435)
 docker-compose.prod.yml # production stack (Caddy + api + admin + db + redis)
 ```
@@ -255,7 +255,6 @@ docker-compose.prod.yml # production stack (Caddy + api + admin + db + redis)
 ## Roadmap
 
 - Template-message-based reminder delivery out of the box
-- Company landing page (separate project)
 
 ## Contributing
 

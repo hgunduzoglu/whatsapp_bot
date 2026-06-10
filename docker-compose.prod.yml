@@ -67,13 +67,10 @@ services:
       - "443:443"
     environment:
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
-      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN in .env}
-      WWW_DOMAIN: ${WWW_DOMAIN:?set WWW_DOMAIN in .env}
       API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN in .env}
       ADMIN_DOMAIN: ${ADMIN_DOMAIN:?set ADMIN_DOMAIN in .env}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./deploy/site:/srv/site:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

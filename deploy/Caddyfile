@@ -2,13 +2,6 @@
 	email {$ACME_EMAIL}
 }
 
-# Company landing page (placeholder until the real site is built)
-{$SITE_DOMAIN}, {$WWW_DOMAIN} {
-	root * /srv/site
-	file_server
-	encode gzip
-}
-
 # Backend API (WhatsApp webhook lives here)
 {$API_DOMAIN} {
 	reverse_proxy api:3000
