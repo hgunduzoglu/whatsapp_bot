@@ -112,7 +112,11 @@ export const TEXTS = {
   askCustomerNote: 'Not yazınız veya geçmek için 0 yazınız:',
   customerSaved: (label: string): string => `Müşteri kaydedildi: ${label}`,
   askSearchQuery: 'Müşteri adını yazınız:',
-  noCustomerMatches: 'Eşleşen müşteri bulunamadı. Lütfen tekrar yazınız:',
+  noCustomerMatches: [
+    'Eşleşen müşteri bulunamadı. Lütfen tekrar yazınız.',
+    '',
+    'Vazgeçmek için "iptal", ana menüye dönmek için "ana menü" yazabilirsiniz.',
+  ].join('\n'),
   customerMatches: (lines: string[]): string =>
     ['Eşleşen müşteriler:', '', ...lines, '', 'Seçmek için numara yazınız.'].join('\n'),
 
