@@ -18,6 +18,8 @@ const CANCEL_COMMANDS = new Set(['iptal']);
 const MAIN_MENU_COMMANDS = new Set(['ana menu', 'menu', 'ana sayfa']);
 const BACK_COMMANDS = new Set(['geri']);
 const HELP_COMMANDS = new Set(['yardim', 'help']);
+// "öğret" normalizes to "ogret" through the Turkish folding
+const TUTORIAL_COMMANDS = new Set(['ogret', 'ogretici', 'egitim']);
 
 @Injectable()
 export class BotRouterService implements BotDispatcher {
@@ -77,6 +79,18 @@ export class BotRouterService implements BotDispatcher {
 
     if (HELP_COMMANDS.has(command)) {
       replies.push(TEXTS.help);
+      replies.push(...(await this.renderPrompt(session, message.from)));
+      await this.sessions.save(message.from, session);
+      return replies;
+    }
+
+    if (TUTORIAL_COMMANDS.has(command)) {
+      // Practice mode: everything entered stays in the session and is
+      // discarded on exit; no domain records are ever created.
+      session.state = BotState.TUTORIAL;
+      session.data = { tutorial: { step: 0, items: [], allocations: [] } };
+      session.selectedCustomerId = null;
+      session.history = [BotState.MAIN_MENU];
       replies.push(...(await this.renderPrompt(session, message.from)));
       await this.sessions.save(message.from, session);
       return replies;

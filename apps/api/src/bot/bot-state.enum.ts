@@ -5,6 +5,10 @@
 export enum BotState {
   MAIN_MENU = 'MAIN_MENU',
 
+  // Guided practice mode ("öğret"): mirrors the real flows step by step but
+  // never touches the database; everything lives in the session only
+  TUTORIAL = 'TUTORIAL',
+
   // Customer management
   CUSTOMER_MENU = 'CUSTOMER_MENU',
   CUSTOMER_ADD_NAME = 'CUSTOMER_ADD_NAME',

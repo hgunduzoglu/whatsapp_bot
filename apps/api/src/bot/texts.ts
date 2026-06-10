@@ -6,7 +6,10 @@
  */
 
 export const TEXTS = {
-  welcome: 'Merhaba! WhatsApp CRM botuna hoş geldiniz.',
+  welcome: [
+    'Merhaba! WhatsApp CRM botuna hoş geldiniz.',
+    'Botu adım adım öğrenmek için "öğret" yazabilirsiniz (deneme modunda hiçbir şey kaydedilmez).',
+  ].join('\n'),
   sessionExpired: 'Oturum zaman aşımına uğradı, ana menüye dönüldü.',
   operationCancelled: 'İşlem iptal edildi.',
   invalidOption: 'Geçersiz seçim. Lütfen listedeki numaralardan birini yazınız.',
@@ -20,6 +23,7 @@ export const TEXTS = {
     '- geri: bir önceki adıma döner',
     '- ana menü: ana menüye döner',
     '- yardım: bu mesajı gösterir',
+    '- öğret: tüm işlemleri kayıt oluşturmadan adım adım öğreten deneme modunu başlatır',
   ].join('\n'),
 
   mainMenu: [
